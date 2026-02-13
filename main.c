@@ -1,44 +1,41 @@
 #include "raylib.h"
-#include <stdbool.h>
-#include <stdlib.h>
-void DrawImages();
-Texture2D DrawImage(Image ,Image ,int ,int );
-void ImageUnload(Texture2D ,Image);
-bool CreateWindow(int width,int height);
-int main() {
-if(CreateWindow(800,400)){
-    DrawImages();
-}
-    return 0;
-}
-bool CreateWindow(int width,int height){
-InitWindow(width,height,"Pear");
-return IsWindowReady();
-}
-void DrawImages() {
-    Image canvas = GenImageColor(800, 400, RAYWHITE);
-    Image background = LoadImage("assets/game_background.png");
-Texture2D background_texture = DrawImage(canvas,background,800,400);
-while (!WindowShouldClose()) {
-    BeginDrawing();
-        ClearBackground(BLACK);
-        DrawTexture(background_texture, 0, 0, WHITE);
-        
-    EndDrawing(); 
-}
 
-  ImageUnload(background_texture,background);
-    UnloadImage(canvas);
-    CloseWindow();
-}
-Texture2D DrawImage(Image canvas,Image sprite,int width,int height){
-    if (IsImageValid(sprite)) {
-        ImageResize(&sprite, width, height);
-        ImageDraw(&canvas, sprite, (Rectangle){0,0,800,400}, (Rectangle){0,0,sprite.width,sprite.height}, WHITE);
+int main() {
+    InitWindow(800, 400, "Scaled & Moving");
+    SetTargetFPS(60);
+
+    Texture2D background = LoadTexture("assets/game_background.png");
+    Texture2D player = LoadTexture("assets/player.png");
+
+    // Define the PLAYER size and starting position
+    Rectangle playerDest = { 100, 100, 64, 64 }; // X, Y, Width, Height
+    Vector2 playerOrigin = { 0, 0 };             // Rotation center (top-left)
+
+    while (!WindowShouldClose()) {
+        // Update Position based on input
+        if (IsKeyDown(KEY_RIGHT)) playerDest.x += 5;
+        if (IsKeyDown(KEY_LEFT))  playerDest.x -= 5;
+
+        BeginDrawing();
+            ClearBackground(BLACK);
+
+            // 1. SCALE BACKGROUND to fill 800x400
+            DrawTexturePro(background, 
+                (Rectangle){ 0, 0, (float)background.width, (float)background.height }, // Source
+                (Rectangle){ 0, 0, 800, 400 },                                          // Dest (Scale)
+                (Vector2){ 0, 0 }, 0.0f, WHITE);
+
+            // 2. SCALE PLAYER to 64x64
+            DrawTexturePro(player, 
+                (Rectangle){ 0, 0, (float)player.width, (float)player.height },       // Source
+                playerDest,                                                             // Dest (Scale)
+                playerOrigin, 0.0f, WHITE);
+
+        EndDrawing();
     }
-    return LoadTextureFromImage(canvas);
-}
-void ImageUnload(Texture2D texture,Image sprite){
-    UnloadTexture(texture);
-    UnloadImage(sprite);
+
+    UnloadTexture(background);
+    UnloadTexture(player);
+    CloseWindow();
+    return 0;
 }
