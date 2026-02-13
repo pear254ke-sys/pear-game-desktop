@@ -1,41 +1,36 @@
 #include "raylib.h"
-
+#include "stdlib.h"
+void DrawImage(Texture2D,Vector2,Rectangle);
 int main() {
     InitWindow(800, 400, "Scaled & Moving");
     SetTargetFPS(60);
-
     Texture2D background = LoadTexture("assets/game_background.png");
     Texture2D player = LoadTexture("assets/player.png");
-
-    // Define the PLAYER size and starting position
-    Rectangle playerDest = { 100, 100, 64, 64 }; // X, Y, Width, Height
-    Vector2 playerOrigin = { 0, 0 };             // Rotation center (top-left)
+    Rectangle playerDest = { 100, 100, 64, 64 };
+    Vector2 origin = { 0, 0 };  
+    Rectangle backgroundDest = { 0, 0, 800, 400 };           
 
     while (!WindowShouldClose()) {
-        // Update Position based on input
-        if (IsKeyDown(KEY_RIGHT)) playerDest.x += 5;
-        if (IsKeyDown(KEY_LEFT))  playerDest.x -= 5;
+        Vector2 mousePos = GetMousePosition();
+        playerDest.x = mousePos.x - (playerDest.width / 2);
+playerDest.y = mousePos.y - (playerDest.height / 2);
 
         BeginDrawing();
             ClearBackground(BLACK);
+DrawImage(background, origin, backgroundDest);
+DrawImage(player,origin,playerDest);
 
-            // 1. SCALE BACKGROUND to fill 800x400
-            DrawTexturePro(background, 
-                (Rectangle){ 0, 0, (float)background.width, (float)background.height }, // Source
-                (Rectangle){ 0, 0, 800, 400 },                                          // Dest (Scale)
-                (Vector2){ 0, 0 }, 0.0f, WHITE);
-
-            // 2. SCALE PLAYER to 64x64
-            DrawTexturePro(player, 
-                (Rectangle){ 0, 0, (float)player.width, (float)player.height },       // Source
-                playerDest,                                                             // Dest (Scale)
-                playerOrigin, 0.0f, WHITE);
-
-        EndDrawing();
+        EndDrawing(); 
     }
 
     UnloadTexture(background);
     UnloadTexture(player);
     CloseWindow();
     return 0;
+}
+void DrawImage(Texture2D sprite,Vector2 origin,Rectangle dest){
+    DrawTexturePro(sprite, 
+        (Rectangle){ 0, 0, (float)sprite.width, (float)sprite.height }, 
+        (Rectangle)dest,                                         
+        (Vector2)origin, 0.0f, WHITE);
 }
